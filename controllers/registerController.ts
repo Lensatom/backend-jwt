@@ -1,4 +1,6 @@
 const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
+require("dotenv").config()
 
 const register = async (req, res) => {
   const data = {...req.body}
@@ -17,7 +19,18 @@ const register = async (req, res) => {
   const hashedPassword = await bcrypt.hash(data.password, 10)
   data.password = hashedPassword
 
-  res.send(data)
+  const accessToken = jwt.sign(
+    {username: data.first_name},
+    process.env.ACCESS_TOKEN_SECRET,
+    {expiresIn: '30s'}
+  )
+  const refreshToken = jwt.sign(
+    {username: data.first_name},
+    process.env.REFRESH_TOKEN_SECRET,
+    {expiresIn: '1d'}
+  )
+
+  res.json(data)
 }
 
 module.exports = { register }
